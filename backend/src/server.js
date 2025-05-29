@@ -7,19 +7,27 @@ import {clerkWebhooks} from "./controllers/clerkWebhooks.js";
 
 const app = express();
 
-app.use(cors());  //Enable cross-origin Resource sharing
-// Clerk Middleware to protected route
-app.use(express.json());
-app.use(clerkMiddleware())
+const PORT = process.env.PORT || 3000;
 
+// Enable cross-origin Resource sharing
+app.use(cors());
+
+// Webhook route BEFORE express.json() middleware
+// This ensures we get the raw body for signature verification
+app.post("/api/clerk", express.raw({ type: 'application/json' }), clerkWebhooks);
+
+// JSON middleware for other routes
+app.use(express.json());
+
+// Clerk Middleware for protected routes (after webhook route)
+app.use(clerkMiddleware());
 
 const PORT = process.env.PORT || 3000;
 
-
-// API  to listen to clerk WebHooks
-app.use("/api/clerk", clerkWebhooks)
-
+// Basic route
 app.get('/', (req, res) => res.send("API is smiling"));
+
+
 
 app.listen(PORT, () => {
        connectDB();

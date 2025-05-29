@@ -11,8 +11,8 @@ const Home=() =>{
     <>
     <Hero/>
     <FeaturedDestination />
-     <ExclusiveOffers/>
-      <Testimonial />
+    <ExclusiveOffers/>
+    <Testimonial />
     <Newsletter/>
     </>
 

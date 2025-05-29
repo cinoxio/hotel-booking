@@ -85,7 +85,6 @@ const MyBookings = ()=> {
                              )}
                         </div>
 
-
                      </div>
                 ))}
 

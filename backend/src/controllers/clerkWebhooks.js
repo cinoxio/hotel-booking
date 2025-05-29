@@ -1,6 +1,7 @@
 import { Webhook } from 'svix';
 import User from '../models/user-model.js';
 
+
 export const clerkWebhooks = async (req, res) => {
     try {
         const wbHook = new Webhook(process.env.CLERK_WEBHOOK_SECRET)
@@ -31,7 +32,7 @@ export const clerkWebhooks = async (req, res) => {
                 break;
             }
             case 'user.updated': {
-                await User.findByIdAndUpdate(data.id, userdata);
+                await User.findByIdAndUpdate(data.id, userData);
                 break;
             }
             case 'user.deleted':
@@ -39,14 +40,19 @@ export const clerkWebhooks = async (req, res) => {
                     await User.findByIdAndDelete(data.id);
                     break;
                 }
+             console.log(`Unhandled webhook type: ${type}`);
              default:break;
                 }
-                res.json({
+
+                res.status(200).json({
                     success: true,
                     message: 'Webhook received and processed successfully.',
              });
     } catch (error) {
         console.log(error.message);
-        res.json({ success: false, message: error.message });
+       return res.status(500).json({success: false, message: error.message });
     }
 };
+
+
+

@@ -6,8 +6,8 @@ import { clerkMiddleware } from '@clerk/express';
 import {clerkWebhooks} from "./controllers/clerkWebhooks.js";
 
 const app = express();
-app.use(cors());  //Enable cross-origin Resource sharing
 
+app.use(cors());  //Enable cross-origin Resource sharing
 // Clerk Middleware to protected route
 app.use(express.json());
 app.use(clerkMiddleware())

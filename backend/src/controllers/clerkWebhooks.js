@@ -3,7 +3,8 @@ import User from '../models/user-model.js';
 
 export const clerkWebhooks = async (req, res) => {
     try {
-        const webHook = new Webhook(process.env.CLERK_WEBHOOK_SECRET)
+        const wbHook = new Webhook(process.env.CLERK_WEBHOOK_SECRET)
+        // Getting Headers
         const headers = {
             'svix-id': req.headers['svix-id'],
             'svix-timestamp': req.headers['svix-timestamp'],
@@ -11,7 +12,7 @@ export const clerkWebhooks = async (req, res) => {
         };
 
         // Verify Headers
-        await webHook.verify(JSON.stringify(req.body), headers);
+        await wbHook.verify(JSON.stringify(req.body), headers);
         // Getting data from request body
         const { data, type } = req.body;
 
@@ -38,8 +39,7 @@ export const clerkWebhooks = async (req, res) => {
                     await User.findByIdAndDelete(data.id);
                     break;
                 }
-                default:
-                    break;
+             default:break;
                 }
                 res.json({
                     success: true,

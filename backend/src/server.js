@@ -6,19 +6,22 @@ import { clerkMiddleware } from '@clerk/express';
 import {clerkWebhooks} from "./controllers/clerkWebhooks.js";
 
 const app = express();
-app.use(cors());
+app.use(cors());  //Enable cross-origin Resource sharing
 
-app.get('/', (req, res) => res.send("API is smiling"));
-
-app.use(express.json());
 // Clerk Middleware to protected route
-
+app.use(express.json());
 app.use(clerkMiddleware())
 
-// API  to listen to clerk WebHooks
-app.use("api/clerk", clerkWebhooks)
 
 const PORT = process.env.PORT || 3000;
+
+
+// API  to listen to clerk WebHooks
+app.use("/api/clerk", clerkWebhooks)
+
+lnhokbvcd\][p  ][kp 0]7app.get('/', (req, res) => res.send("API is smiling"));
+"?:> "
+6
 
 app.listen(PORT, () => {
        connectDB();
@@ -27,4 +30,4 @@ app.listen(PORT, () => {
 )
 
 
-
+j0

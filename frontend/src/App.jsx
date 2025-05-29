@@ -19,7 +19,7 @@ const App=() =>{
   return (
       <>
 <Routes>
- <Route path="*" element={<NotFound />} />
+ {/* <Route path="*" element={<NotFound />} /> */}
   {/* Public routes with Navbar and Footer */}
   <Route path="/" element={<PublicLayout />}>
     <Route index element={<Home />} />

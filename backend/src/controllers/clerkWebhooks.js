@@ -1,9 +1,9 @@
 import { Webhook } from 'svix';
-import User from '../models/User.js';
+import User from '../models/user-model.js';
 
 export const clerkWebhooks = async (req, res) => {
     try {
-        const webHook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
+        const webHook = new Webhook(process.env.CLERK_WEBHOOK_SECRET)
         const headers = {
             'svix-id': req.headers['svix-id'],
             'svix-timestamp': req.headers['svix-timestamp'],
@@ -12,7 +12,6 @@ export const clerkWebhooks = async (req, res) => {
 
         // Verify Headers
         await webHook.verify(JSON.stringify(req.body), headers);
-
         // Getting data from request body
         const { data, type } = req.body;
 
@@ -36,14 +35,16 @@ export const clerkWebhooks = async (req, res) => {
             }
             case 'user.deleted':
                 {
-                    await User.findByIdAndDeleted(data.id);
+                    await User.findByIdAndDelete(data.id);
+                    break;
+                }
+                default:
                     break;
                 }
                 res.json({
                     success: true,
                     message: 'Webhook received and processed successfully.',
-                });
-        }
+             });
     } catch (error) {
         console.log(error.message);
         res.json({ success: false, message: error.message });

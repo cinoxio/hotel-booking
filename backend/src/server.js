@@ -19,15 +19,10 @@ const PORT = process.env.PORT || 3000;
 // API  to listen to clerk WebHooks
 app.use("/api/clerk", clerkWebhooks)
 
-lnhokbvcd\][p  ][kp 0]7app.get('/', (req, res) => res.send("API is smiling"));
-"?:> "
-6
+app.get('/', (req, res) => res.send("API is smiling"));
 
 app.listen(PORT, () => {
        connectDB();
     console.log(`Server running on port ${PORT}`)
   }
 )
-
-
-j0

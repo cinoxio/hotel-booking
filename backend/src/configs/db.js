@@ -3,7 +3,7 @@
 export const connectDB = async ()=> {
     try{
         mongoose.connection.on("connected", ()=> console.log("Database Connected"));
-        await mongoose.connect(`${process.env.MONGODB_URL}`)
+        await mongoose.connect(`${process.env.MONGODB_URL}/hotel-booking`)
     } catch(error){
         console.log("Mongodb not connected", error.message)
     }

@@ -4,7 +4,8 @@ import User from '../models/user-model.js';
 
 export const clerkWebhooks = async (req, res) => {
     try {
-        const wbHook = new Webhook(process.env.CLERK_WEBHOOK_SECRET)
+        // Create xvis instance with clerk webhook secret
+        const wbHook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
         // Getting Headers
         const headers = {
             'svix-id': req.headers['svix-id'],
@@ -21,13 +22,7 @@ export const clerkWebhooks = async (req, res) => {
             _id: data.id,
             email: data.email_addresses[0].email.address,
             username: data.first_name + ' ' + data.last_name,
-            image: data.image_url || data.profile_image_url || null,
-        };
-
-         const userData = {
-            _id: data.id, // This will be "user_2xmJRQDse3UGvAuSAvGldOJ6N2O"
-            email: email,
-            username: username,
+            image: data.image_url || null,
         };
 
         // Switch Cases for different Events
@@ -46,7 +41,7 @@ export const clerkWebhooks = async (req, res) => {
                     await User.findByIdAndDelete(data.id);
                     break;
                 }
-             console.log(`Unhandled webhook type: ${type}`);
+                console.log(`Unhandled webhook type: ${type}`);
              default:break;
                 }
 
@@ -54,7 +49,7 @@ export const clerkWebhooks = async (req, res) => {
                     success: true,
                     message: 'Webhook received and processed successfully.',
              });
-    } catch (error) {
+         } catch (error) {
         console.log(error.message);
        return res.status(500).json({success: false, message: error.message });
     }

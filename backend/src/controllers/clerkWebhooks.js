@@ -4,11 +4,6 @@ import { connectDB } from '../configs/db.js';
 
 export const clerkWebhooks = async (req, res) => {
     try {
-        console.log('=== RAW WEBHOOK DEBUG ===');
-        console.log('Headers:', req.headers);
-        console.log('Raw Body:', req.body.toString());
-        console.log('========================');
-
         // Ensure database connection
         await connectDB();
 
@@ -22,88 +17,36 @@ export const clerkWebhooks = async (req, res) => {
             'svix-signature': req.headers['svix-signature'],
         };
 
-        // Get raw body for verification
-        const payload = req.body;
-
-        // Verify webhook
-        const evt = wbHook.verify(payload, headers);
-
-        console.log('=== VERIFIED EVENT ===');
-        console.log('Full event:', JSON.stringify(evt, null, 2));
-        console.log('====================');
-
-        // Getting data from verified event
+        // Verify webhook and get verified event data
+        const evt = wbHook.verify(req.body, headers);
         const { data, type } = evt;
 
-        // Try different ways to access user data
-        console.log('=== DATA EXTRACTION ATTEMPTS ===');
-        console.log('Type:', type);
-        console.log('Data keys:', Object.keys(data || {}));
-
-        // Try different email field names
-        const possibleEmails = [
-            data?.email_addresses?.[0]?.email_address,
-            data?.email_addresses?.[0]?.email,
-            data?.primary_email_address?.email_address,
-            data?.primary_email_address?.email,
-            data?.email
-        ];
-        console.log('Possible emails:', possibleEmails);
-
-        // Try different name combinations
-        const possibleNames = [
-            data?.username,
-            `${data?.first_name || ''} ${data?.last_name || ''}`.trim(),
-            data?.name,
-            data?.full_name
-        ];
-        console.log('Possible names:', possibleNames);
-
-        // Try different image URLs
-        const possibleImages = [
-            data?.image_url,
-            data?.profile_image_url,
-            data?.avatar_url
-        ];
-        console.log('Possible images:', possibleImages);
-        console.log('===============================');
-
-        // Get the first non-empty value
-        const getFirstValid = (arr) => arr.find(item => item && item.trim && item.trim());
-
+        // Prepare user data with safe access to nested properties
         const userData = {
             _id: data.id,
-            email: getFirstValid(possibleEmails) || 'no-email@example.com',
-            username: getFirstValid(possibleNames) || 'Unknown User',
-            image: getFirstValid(possibleImages) || null,
+            email:
+                data.email_addresses?.[0]?.email_address ||
+                data.primary_email_address?.email_address ||
+                '',
+            username:
+                `${data.first_name || ''} ${data.last_name || ''}`.trim() ||
+                data.username ||
+                'User',
+            image: data.image_url || null,
         };
-
-        console.log('=== FINAL USER DATA ===');
-        console.log('userData to save:', JSON.stringify(userData, null, 2));
-        console.log('=====================');
 
         // Switch Cases for different Events
         switch (type) {
             case 'user.created': {
-                console.log('Creating user:', userData._id);
-                const newUser = await User.create(userData);
-                console.log('User created successfully:', newUser);
+                await User.create(userData);
                 break;
             }
             case 'user.updated': {
-                console.log('Updating user:', userData._id);
-                const updatedUser = await User.findByIdAndUpdate(
-                    data.id,
-                    userData,
-                    { new: true, upsert: true }
-                );
-                console.log('User updated successfully:', updatedUser);
+                await User.findByIdAndUpdate(data.id, userData, { new: true });
                 break;
             }
             case 'user.deleted': {
-                console.log('Deleting user:', data.id);
                 await User.findByIdAndDelete(data.id);
-                console.log('User deleted successfully');
                 break;
             }
             default:
@@ -115,75 +58,141 @@ export const clerkWebhooks = async (req, res) => {
             success: true,
             message: 'Webhook received and processed successfully.',
         });
-
     } catch (error) {
-        console.error('Webhook error:', error);
-        console.error('Error stack:', error.stack);
+        console.error('Webhook error:', error.message);
         return res.status(500).json({
             success: false,
-            message: error.message
+            message: error.message,
         });
     }
 };
 
-
-
 // import { Webhook } from 'svix';
 // import User from '../models/user-model.js';
-
+// import { connectDB } from '../configs/db.js';
 
 // export const clerkWebhooks = async (req, res) => {
 //     try {
-//         // Create xvis instance with clerk webhook secret
+//         // Ensure database connection
+//         await connectDB();
+//         // Create svix instance with clerk webhook secret
 //         const wbHook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
-//         // Getting Headers
+
+//         // Getting Headers for verification
 //         const headers = {
 //             'svix-id': req.headers['svix-id'],
 //             'svix-timestamp': req.headers['svix-timestamp'],
 //             'svix-signature': req.headers['svix-signature'],
 //         };
 
-//         // Verify Headers
-//         await wbHook.verify(JSON.stringify(req.body), headers);
-//         // Getting data from request body
-//         const { data, type } = req.body;
+//         // Verify webhook signature
+//         const evt = wbHook.verify(req.body, headers);
+//         const { data, type } = evt;
 
-//         const userData = {
-//             _id: data.id,
-//             email: data.email_addresses[0].email.address,
-//             username: data.first_name + ' ' + data.last_name,
-//             image: data.image_url || null,
+//         // Helper function to get first valid value from array
+//         const getFirstValid = (arr) =>
+//             arr.find((item) => item && item.trim && item.trim());
+
+//         // Extract user data from webhook payload
+//         const extractUserData = (userData) => {
+//             const possibleEmails = [
+//                 userData?.email_addresses?.[0]?.email_address,
+//                 userData?.email_addresses?.[0]?.email,
+//                 userData?.primary_email_address?.email_address,
+//                 userData?.primary_email_address?.email,
+//                 userData?.email,
+//             ];
+
+//             const possibleNames = [
+//                 userData?.username,
+//                 `${userData?.first_name || ''} ${
+//                     userData?.last_name || ''
+//                 }`.trim(),
+//                 userData?.name,
+//                 userData?.full_name,
+//             ];
+
+//             const possibleImages = [
+//                 userData?.image_url,
+//                 userData?.profile_image_url,
+//                 userData?.avatar_url,
+//             ];
+
+//             return {
+//                 _id: userData.id,
+//                 email: getFirstValid(possibleEmails) || '',
+//                 username: getFirstValid(possibleNames) || 'User',
+//                 image: getFirstValid(possibleImages) || null,
+//             };
 //         };
 
-//         // Switch Cases for different Events
-
+//         // Process webhook events
 //         switch (type) {
 //             case 'user.created': {
-//                 await User.create(userData);
-//                 break;
-//             }
-//             case 'user.updated': {
-//                 await User.findByIdAndUpdate(data.id, userData);
-//                 break;
-//             }
-//             case 'user.deleted':
-//                 {
-//                     await User.findByIdAndDelete(data.id);
-//                     break;
-//                 }
-//                 console.log(`Unhandled webhook type: ${type}`);
-//              default:break;
+//                 const userData = extractUserData(data);
+
+//                 // Validate required fields
+//                 if (!userData.email) {
+//                     throw new Error('Email is required for user creation');
 //                 }
 
-//                 res.status(200).json({
-//                     success: true,
-//                     message: 'Webhook received and processed successfully.',
-//              });
-//          } catch (error) {
-//         console.log(error.message);
-//        return res.status(500).json({success: false, message: error.message });
+//                 const newUser = await User.create(userData);
+
+//                 // Log success for monitoring (optional)
+//                 if (process.env.NODE_ENV === 'development') {
+//                     console.log(`✅ User created: ${newUser._id}`);
+//                 }
+//                 break;
+//             }
+
+//             case 'user.updated': {
+//                 const userData = extractUserData(data);
+
+//                 const updatedUser = await User.findByIdAndUpdate(
+//                     data.id,
+//                     userData,
+//                     { new: true, upsert: true }
+//                 );
+
+//                 if (process.env.NODE_ENV === 'development') {
+//                     console.log(`✅ User updated: ${updatedUser._id}`);
+//                 }
+//                 break;
+//             }
+
+//             case 'user.deleted': {
+//                 await User.findByIdAndDelete(data.id);
+
+//                 if (process.env.NODE_ENV === 'development') {
+//                     console.log(`✅ User deleted: ${data.id}`);
+//                 }
+//                 break;
+//             }
+
+//             default:
+//                 // Log unhandled events for monitoring
+//                 if (process.env.NODE_ENV === 'development') {
+//                     console.log(`ℹ️ Unhandled webhook type: ${type}`);
+//                 }
+//                 break;
+//         }
+
+//         // Send success response
+//         res.status(200).json({
+//             success: true,
+//             message: 'Webhook processed successfully',
+//         });
+//     } catch (error) {
+//         // Log errors for monitoring
+//         console.error('❌ Webhook error:', error.message);
+
+//         // Send error response
+//         return res.status(500).json({
+//             success: false,
+//             message: 'Webhook processing failed',
+//             ...(process.env.NODE_ENV === 'development' && {
+//                 error: error.message,
+//             }),
+//         });
 //     }
 // };
-
-
-

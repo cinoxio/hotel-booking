@@ -10,7 +10,24 @@ import {
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
-axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+
+// Configure axios defaults
+axios.defaults.baseURL = API_BASE_URL;
+axios.defaults.withCredentials = true;  // Important for CORS with credentials
+
+// ✅ ADDED: Request interceptor for better debugging
+axios.interceptors.request.use(
+    (config) => {
+        console.log('📡 Making request to:', config.url);
+        console.log('📡 With headers:', config.headers);
+        return config;
+    },
+    (error) => {
+        console.error('📡 Request error:', error);
+        return Promise.reject(error);
+    }
+);
 
 // Create the context
 export const AppContext = createContext();

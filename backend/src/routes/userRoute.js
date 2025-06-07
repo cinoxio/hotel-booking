@@ -1,10 +1,30 @@
+// import express from 'express';
+// import { getUser, storeRecentSearchCities } from '../controllers/userController.js';
+// import { protectedRoute } from '../middlewares/authMiddleware.js';
+
+// const userRouter = express.Router();
+
+// userRouter.get('/', protectedRoute, getUser);
+// userRouter.post('/recent-cities', protectedRoute, storeRecentSearchCities);
+
+// export default userRouter;
+
 import express from 'express';
+import { protectedRoute } from '../middlewares/authMiddleware.js';
 import { getUser, storeRecentSearchCities } from '../controllers/userController.js';
-import { protectedRoute } from '../middleware/authMiddleware.js';
 
-const userRouter = express.Router();
+const router = express.Router();
 
-userRouter.get('/', protectedRoute, getUser);
-userRouter.post('/recent-cities', protectedRoute, storeRecentSearchCities);
+// Add logging to see if routes are being registered
+console.log('📋 Registering user routes...');
 
-export default userRouter;
+router.get('/', (req, res, next) => {
+    console.log('🛣️ GET /api/user route hit');
+    next();
+}, protectedRoute, getUser);
+
+router.post('/recent-cities', protectedRoute, storeRecentSearchCities);
+
+console.log('✅ User routes registered');
+
+export default router;

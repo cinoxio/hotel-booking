@@ -30,15 +30,19 @@ export const AppProvider = ({ children }) => {
             const token = await getToken();
             if (!token) return;
 
-            const { data } = await axios.get('/api/users', {
+            // ✅ FIXED: Use correct endpoint
+            const { data } = await axios.get('/api/user', {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
 
+            console.log('User data received:', data); // Debug log
+
             if (data.success) {
-                setIsOwner(data.user?.role === 'hotelOwner');
-                setSearchCities(data.user?.recentSearchCities || []);
+                // ✅ FIXED: Match backend response structure
+                setIsOwner(data.role === 'hotelOwner');
+                setSearchCities(data.recentSearchedCities || []);
             } else {
                 console.log('Failed to fetch user data');
             }
@@ -70,6 +74,7 @@ export const AppProvider = ({ children }) => {
         setShowHotelReg,
         searchCities,
         setSearchCities,
+        fetchUser, // ✅ ADDED: Expose fetchUser for manual refresh
         axios,
     };
 

@@ -3,13 +3,21 @@ import User from '../models/user-model.js';
 // GET API/USER
 export const getUser = async (req, res) => {
     try {
+        console.log('User from middleware:', req.user); // Debug
         const role = req.user.role;
         const recentSearchedCities = req.user.recentSearchedCities;
-        return res.json({success: true, role, recentSearchedCities});
+
+        console.log('Sending response:', { role, recentSearchedCities }); // Debug
+        return res.json({ success: true, role, recentSearchedCities });
     } catch (error) {
-        res.status(500).json({success: false, message: error.message || 'Internal Server Error'});
+        console.error('getUser error:', error); // Debug
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Internal Server Error',
+        });
     }
-}
+};
+
 
 // User recent search cities
 export const storeRecentSearchCities = async (req, res) => {

@@ -4,7 +4,7 @@ import User from '../models/user-model.js';
 export const protectedRoute = async (req, res, next) => {
     try {
         // ✅ FIXED: Remove parentheses - req.auth is an object, not a function
-        const { userId } = req.auth;
+        const { userId } = req.auth();
 
         if (!userId) {
             return res.status(401).json({

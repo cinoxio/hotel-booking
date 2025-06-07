@@ -1,19 +1,17 @@
-import Navbar from "./components/Navbar";
-import { Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import AllRooms from './pages/AllRooms';
-import RoomDetailsPage from "./pages/RoomDetails";
-import Footer from "./components/Footer";
-import MyBookings from "./pages/MyBookings";
-import HotelRegistration from "./components/HotelReg";
-import Layout from './pages/hotelOwner/Layout';
-import AddRoom from './pages/hotelOwner/AddRoom';
-import ListRoom from './pages/hotelOwner/ListRoom';
-import Dashboard from './pages/hotelOwner/Dashboard';
-import PublicLayout from './pages/publicLayout/PublicLayout';
+import { Toaster } from 'react-hot-toast';
+import { Route, Routes } from 'react-router-dom';
+import HotelRegistration from './components/HotelReg';
 import NotFound from './components/notFound/NotFound';
-import { Toaster } from "react-hot-toast";
-import { useAppContext } from './context/AppContext'; // Fixed import path
+import { useAppContext } from './context/useAppContext'; // Fixed import path
+import AllRooms from './pages/AllRooms';
+import Home from './pages/Home';
+import AddRoom from './pages/hotelOwner/AddRoom';
+import Dashboard from './pages/hotelOwner/Dashboard';
+import Layout from './pages/hotelOwner/Layout';
+import ListRoom from './pages/hotelOwner/ListRoom';
+import MyBookings from './pages/MyBookings';
+import PublicLayout from './pages/publicLayout/PublicLayout';
+import RoomDetailsPage from './pages/RoomDetails';
 
 const App = () => {
     const { showHotelReg } = useAppContext();

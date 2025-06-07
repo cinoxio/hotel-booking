@@ -8,7 +8,7 @@ import {
     useClerk,
     UserButton,
 } from '@clerk/clerk-react';
-import { useAppContext } from '../context/AppContext';
+import { useAppContext } from '../context/useAppContext';
 
 
 

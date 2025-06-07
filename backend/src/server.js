@@ -4,9 +4,16 @@ import cors from 'cors';
 import { clerkMiddleware } from '@clerk/express';
 import { connectDB } from './configs/db.js';
 import { clerkWebhooks } from './controllers/clerkWebhooks.js';
+import userRouter from './routes/userRoute.js';
+import hotelRouter from './routes/hotelRoute.js';
+import connectCloudinary from './configs/cloudinary.js';
+import roomRouter from './routes/roomRoute.js';
+import bookingRouter from './routes/bookingRoute.js';
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+await connectCloudinary()
 
 // Enable cross-origin Resource sharing
 app.use(cors());
@@ -26,6 +33,10 @@ app.use(clerkMiddleware());
 
 // Basic route
 app.get('/', (req, res) => res.send('API is smiling'));
+app.use('/api/user', userRouter);
+app.use("/api/hotels", hotelRouter);
+app.use("/api/rooms", roomRouter);
+app.use("/api/bookings", bookingRouter)
 
 // ✅ BETTER: Connect to DB BEFORE starting server
 const startServer = async () => {

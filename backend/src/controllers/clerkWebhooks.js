@@ -1,7 +1,11 @@
 import { Webhook } from 'svix';
 import User from '../models/user-model.js';
+
+
 export const clerkWebhooks = async (req, res) => {
     try {
+        console.log('📥 Webhook received:', req.headers['svix-id']);
+
         // Create svix instance with clerk webhook secret
         const wbHook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
@@ -12,9 +16,13 @@ export const clerkWebhooks = async (req, res) => {
             'svix-signature': req.headers['svix-signature'],
         };
 
+        console.log('🔍 Headers received:', Object.keys(headers));
+
         // Verify webhook and get verified event data
         const evt = wbHook.verify(req.body, headers);
         const { data, type } = evt;
+
+        console.log('✅ Webhook verified. Type:', type, 'User ID:', data.id);
 
         // Prepare user data with safe access to nested properties
         const userData = {
@@ -30,22 +38,27 @@ export const clerkWebhooks = async (req, res) => {
             image: data.image_url || null,
         };
 
+        console.log('👤 Processing user data:', { id: userData._id, email: userData.email, username: userData.username });
+
         // Switch Cases for different Events
         switch (type) {
             case 'user.created': {
-                await User.create(userData);
+                const newUser = await User.create(userData);
+                console.log('✅ User created successfully:', newUser._id);
                 break;
             }
             case 'user.updated': {
-                await User.findByIdAndUpdate(data.id, userData, { new: true });
+                const updatedUser = await User.findByIdAndUpdate(data.id, userData, { new: true });
+                console.log('✅ User updated successfully:', updatedUser?._id);
                 break;
             }
             case 'user.deleted': {
                 await User.findByIdAndDelete(data.id);
+                console.log('✅ User deleted successfully:', data.id);
                 break;
             }
             default:
-                console.log(`Unhandled webhook type: ${type}`);
+                console.log(`⚠️ Unhandled webhook type: ${type}`);
                 break;
         }
 
@@ -54,11 +67,11 @@ export const clerkWebhooks = async (req, res) => {
             message: 'Webhook received and processed successfully.',
         });
     } catch (error) {
-        console.error('Webhook error:', error.message);
+        console.error('❌ Webhook error:', error.message);
+        console.error('Stack trace:', error.stack);
         return res.status(500).json({
             success: false,
             message: error.message,
         });
     }
 };
-

@@ -62,7 +62,8 @@ export const createBooking = async (req, res) => {
             room,
             hotel: roomData.hotel._id,
             guests: +guests,
-            checkInDate, checkOutDate,
+            checkInDate,
+            checkOutDate,
            totalPrice
 
         })
@@ -92,7 +93,7 @@ export const getUserBookings = async (req, res) => {
 
 export const getHotelBookings = async (req, res) => {
     try {
-        const hotel = await Hotel.findOne({ owner: req.user._id }); // ✅ FIXED: Use req.user instead of req.auth
+        const hotel = await Hotel.findOne({ owner: req.auth.userId });
 
         if (!hotel) {
             return res.json({ success: false, message: 'No Hotel found' });
@@ -108,7 +109,7 @@ export const getHotelBookings = async (req, res) => {
         const totalRevenue = bookings.reduce(
             (acc, booking) => acc + booking.totalPrice,
             0
-        ); // ✅ FIXED: Use correct field name
+        );
 
         res.json({
             success: true,

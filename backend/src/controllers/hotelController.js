@@ -9,7 +9,7 @@ export const registerHotel = async (req, res) => {
         const hotel = await Hotel.findOne({ owner })
 
         if (hotel) {
-            return res.status(400).json({ success: false, message: 'You already have a hotel registered' });
+            return res.status(400).json({ success: false, message: 'Hotel already registered' });
         }
         // ✅ FIXED: Use await with Hotel.create() OR create then save, not both
         const newHotel = await Hotel.create({

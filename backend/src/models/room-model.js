@@ -8,13 +8,12 @@ const roomSchema = new mongoose.Schema(
             ref: 'Hotel',
         },
         roomType: { type: String, required: true },
-        description: { type: String, default: '' }, // ✅ FIXED: Removed duplicate
         pricePerNight: {
             type: Number,
             required: true,
         },
         amenities: { type: Array, required: true },
-        images: [{ type: String, required: true }],
+        images: [{ type: String}],
         isAvailable: { type: Boolean, default: true },
     },
     { timestamps: true }

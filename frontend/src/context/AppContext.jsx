@@ -34,49 +34,56 @@ export const AppContext = createContext();
 
 // Provider component
 export const AppProvider = ({ children }) => {
-    const navigate = useNavigate();
-    const { user } = useUser();
-    const { getToken } = useAuth();
 
-    const [isOwner, setIsOwner] = useState(false);
-    const [showHotelReg, setShowHotelReg] = useState(false);
-    const [searchCities, setSearchCities] = useState([]);
+ const navigate = useNavigate();
+ const { user, isLoaded } = useUser();
+ const { getToken, isSignedIn } = useAuth();
 
-    const fetchUser = useCallback(async () => {
-        try {
-            const token = await getToken();
-            if (!token) return;
+ const [isOwner, setIsOwner] = useState(false);
+ const [showHotelReg, setShowHotelReg] = useState(false);
+ const [searchCities, setSearchCities] = useState([]);
+ const [loading, setLoading] = useState(false);
 
-            // ✅ FIXED: Use correct endpoint
-            const { data } = await axios.get('/api/user', {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
 
-            console.log('User data received:', data); // Debug log
+const fetchUser = useCallback(async () => {
+    if (!isLoaded || !isSignedIn || !user?.id) {
+        console.log('🔍 User not ready:', {
+            isLoaded,
+            isSignedIn,
+            userId: user?.id,
+        });
+        return;
+    }
 
-            if (data.success) {
-                // ✅ FIXED: Match backend response structure
-                setIsOwner(data.role === 'hotelOwner');
-                setSearchCities(data.recentSearchedCities || []);
-            } else {
-                console.log('Failed to fetch user data');
-            }
-        } catch (error) {
-            console.error('Error fetching user:', error);
-            // Only show toast for non-auth errors
-            if (error.response?.status !== 401) {
-                toast.error('Failed to fetch user data');
-            }
+    try {
+        setLoading(true);
+        console.log('🔍 Starting fetchUser for:', user.id);
+
+        const token = await getToken();
+        console.log('🔑 Token status:', token ? 'Present' : 'Missing');
+        console.log(
+            '🔑 Token preview:',
+            token ? token.substring(0, 50) + '...' : 'No token'
+        );
+
+        if (!token) {
+            console.log('❌ No token available');
+            return;
         }
-    }, [getToken]);
 
-    useEffect(() => {
-        if (user?.id) {
-            fetchUser();
-        }
-    }, [user?.id, fetchUser]);
+        // Rest of your code...
+    } catch (error) {
+        console.error('❌ Error in fetchUser:', error);
+        // Error handling...
+    }
+}, [getToken, user?.id, isLoaded, isSignedIn]);
+
+
+    // useEffect(() => {
+    //     if (user?.id) {
+    //         fetchUser();
+    //     }
+    // }, [user?.id, fetchUser]);
 
     const currency = import.meta.env.VITE_CURRENCY || '$';
 

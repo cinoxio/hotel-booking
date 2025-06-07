@@ -6,7 +6,7 @@ export const protectRoute = async (req, res, next) => {
         console.log('🔐 Authorization header:', req.headers.authorization);
         console.log('🔐 req.auth available:', typeof req.auth);
         // Let's see what req.auth() actually returns
-        const { userId } = req.auth;
+        const { userId } = req.auth();
         console.log('🔐 Full auth result:', userId);
 
         if (!userId) {

@@ -1,17 +1,20 @@
-import Hotel from '../models/hotel-model.js';
-import User from '../models/user-model.js';
+import Hotel from '../models/Hotel.js';
+import User from '../models/User.js';
 
 export const registerHotel = async (req, res) => {
     try {
         const { name, address, contact, city } = req.body;
-        const owner = req.user._id;
+        const owner = req.user._id; // From middleware
 
-        const hotel = await Hotel.findOne({ owner })
-
-        if (hotel) {
-            return res.status(400).json({ success: false, message: 'Hotel already registered' });
+        // Check if hotel already exists for this owner
+        const existingHotel = await Hotel.findOne({ owner });
+        if (existingHotel) {
+            return res.status(400).json({
+                success: false,
+                message: 'Hotel already registered for this account',
+            });
         }
-        // ✅ FIXED: Use await with Hotel.create() OR create then save, not both
+
         const newHotel = await Hotel.create({
             name,
             address,
@@ -20,12 +23,19 @@ export const registerHotel = async (req, res) => {
             owner,
         });
 
+        // Update user role
         await User.findByIdAndUpdate(owner, { role: 'hotelOwner' });
 
-        res.status(200).json({success: true, message: 'Hotel registered successfully', hotel: newHotel});
-    } catch (error) { // ✅ FIXED: Use 'error' instead of 'err'
-        console.error(error);
-        res.status(500).json({ success: false, message: error.message || 'Internal server error' });
+        res.status(201).json({
+            success: true,
+            message: 'Hotel registered successfully',
+            hotel: newHotel,
+        });
+    } catch (error) {
+        console.error('Hotel registration error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Hotel registration failed',
+        });
     }
-}
-
+};

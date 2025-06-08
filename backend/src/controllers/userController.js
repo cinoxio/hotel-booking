@@ -1,9 +1,7 @@
-import User from '../models/user-model.js';
-
 // GET API/USER
+
 export const getUser = async (req, res) => {
     try {
-
         const role = req.user.role;
         const recentSearchedCities = req.user.recentSearchedCities;
 
@@ -15,12 +13,11 @@ export const getUser = async (req, res) => {
         console.error('❌ getUser error:', error);
         res.status(500).json({
             success: false,
-            message: error.message || 'Internal Server Error',
+            message:
+                error.message || 'Internal Server Error on getUser',
         });
     }
 };
-
-
 
 export const storeRecentSearchCities = async (req, res) => {
     try {
@@ -28,13 +25,13 @@ export const storeRecentSearchCities = async (req, res) => {
         const user = req.user;
 
         // Check if the city already exists to avoid duplicates
-            if (user.recentSearchedCities.length < 3) {
-                user.recentSearchedCities.push(recentSearchedCity);
-            } else {
-                user.recentSearchedCities.shift();
-                user.recentSearchedCities.push(recentSearchedCity);
+        if (user.recentSearchedCities.length < 3) {
+            user.recentSearchedCities.push(recentSearchedCity);
+        } else {
+            user.recentSearchedCities.shift();
+            user.recentSearchedCities.push(recentSearchedCity);
         }
-        await user.save()
+        await user.save();
         return res.status(200).json({
             success: true,
             message: 'Recent searched cities updated successfully.',
@@ -44,7 +41,9 @@ export const storeRecentSearchCities = async (req, res) => {
         console.error('❌ storeRecentSearchCities error:', error);
         res.status(500).json({
             success: false,
-            message: error.message || 'Internal Server Error in Recent search cities',
+            message:
+                error.message ||
+                'Internal Server Error in Recent search cities',
         });
     }
 };

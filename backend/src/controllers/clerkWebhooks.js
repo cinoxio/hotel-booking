@@ -1,12 +1,17 @@
 import { Webhook } from 'svix';
-import User from '../models/user-model.js';
-
+import User from '../models/User.js';
 
 export const clerkWebhooks = async (req, res) => {
     try {
         console.log('📥 Webhook received:', req.headers['svix-id']);
         // Create svix instance with clerk webhook secret
         const wbHook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
+
+        if (!wbHook) {
+            console.log(
+                'Please add CLERK_WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local'
+            );
+        }
         // Getting Headers
         const headers = {
             'svix-id': req.headers['svix-id'],
@@ -17,7 +22,7 @@ export const clerkWebhooks = async (req, res) => {
         console.log('🔍 Headers received:', Object.keys(headers));
 
         // Verify webhook and get verified event data
-        const evt = wbHook.verify(req.body, headers);
+        const evt = wbHook.verify(JSON.stringify(req.body), headers);
         const { data, type } = evt;
 
         console.log('✅ Webhook verified. Type:', type, 'User ID:', data.id);
@@ -36,7 +41,11 @@ export const clerkWebhooks = async (req, res) => {
             image: data.image_url || null,
         };
 
-        console.log('👤 Processing user data:', { id: userData._id, email: userData.email, username: userData.username });
+        console.log('👤 Processing user data:', {
+            id: userData._id,
+            email: userData.email,
+            username: userData.username,
+        });
 
         // Switch Cases for different Events
         switch (type) {
@@ -46,7 +55,11 @@ export const clerkWebhooks = async (req, res) => {
                 break;
             }
             case 'user.updated': {
-                const updatedUser = await User.findByIdAndUpdate(data.id, userData, { new: true });
+                const updatedUser = await User.findByIdAndUpdate(
+                    data.id,
+                    userData,
+                    { new: true }
+                );
                 console.log('✅ User updated successfully:', updatedUser?._id);
                 break;
             }

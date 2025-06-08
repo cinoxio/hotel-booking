@@ -1,7 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
-import User from '../models/user-model.js';
-import Room from '../models/room-model.js';
-import Hotel from '../models/hotel-model.js';
+import Hotel from '../models/Hotel.js';
+import Room from '../models/Room.js';
 
 export const createRoom = async (req, res) => {
     try {
@@ -45,8 +44,7 @@ export const createRoom = async (req, res) => {
             message: error.message || 'Internal server error from createRoom',
         });
     }
-}
-
+};
 
 export const getRooms = async (req, res) => {
     try {
@@ -56,29 +54,31 @@ export const getRooms = async (req, res) => {
                 populate: { path: 'owner', select: 'image' }, // ✅ FIXED: Use correct field names
             })
             .sort({ createdAt: -1 });
-        res.status(200).json({success: true, rooms});
+        res.status(200).json({ success: true, rooms });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: error.message || 'Internal server error' });
+        res.status(500).json({
+            message: error.message || 'Internal server error',
+        });
     }
 };
 
 export const getOwnerRooms = async (req, res) => {
     try {
         // const hotelData = await Hotel.find({ owner: req.user._id });
-      const hotelData = await Hotel.findOne({ owner: req.auth.userId}); // ✅ FIXED: Use findOne instead of find
+        const hotelData = await Hotel.findOne({ owner: req.auth.userId }); // ✅ FIXED: Use findOne instead of find
 
-        const rooms = await Room.find({ hotel: hotelData._id.toString() }).populate("hotel");
+        const rooms = await Room.find({
+            hotel: hotelData._id.toString(),
+        }).populate('hotel');
         res.status(200).json(rooms);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: error.message || 'Internal server error' });
+        res.status(500).json({
+            message: error.message || 'Internal server error',
+        });
     }
 };
-
-
-
-
 
 export const toggleRoomAvailability = async (req, res) => {
     try {
@@ -109,15 +109,15 @@ export const toggleRoomAvailability = async (req, res) => {
         });
     }
 };
-            export const getRoomById = async (req, res) => {
-                try {
-                    const room = await Room.findById(req.params.id);
-                    if (!room) {
-                        return res.status(404).json({ message: 'Room not found' });
-                    }
-                    res.status(200).json(room);
-                } catch (err) {
-                    console.error(err);
-                    res.status(500).json({ message: 'Internal server error' });
-                }
-            };
+export const getRoomById = async (req, res) => {
+    try {
+        const room = await Room.findById(req.params.id);
+        if (!room) {
+            return res.status(404).json({ message: 'Room not found' });
+        }
+        res.status(200).json(room);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};

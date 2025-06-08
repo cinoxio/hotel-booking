@@ -3,22 +3,26 @@ import toast from 'react-hot-toast';
 import { assets, cities } from '../assets/assets';
 import { useAppContext } from '../context/useAppContext';
 
+
+
 const HotelRegistration = () => {
-    const { setShowHotelReg, axios, getToken, setIsOwner } = useAppContext();
+    const { setShowHotelReg, axios,  getToken, setIsOwner } = useAppContext();
 
     const [name, setName] = useState('');
     const [contact, setContact] = useState('');
     const [address, setAddress] = useState('');
     const [city, setCity] = useState('');
 
+
     const onSubmitHandler = async (event) => {
         event.preventDefault();
         console.log(name, contact, address, city);
+
         try {
             const { data } = await axios.post(
                 `/api/hotels/`,
                 { name, contact, address, city },
-                { headers: { Authorization: `Bearer ${getToken()}` } }
+                { headers: { Authorization: `Bearer ${await getToken()}` } }
             );
             if (data.success) {
                 toast.success(data.message);
@@ -32,6 +36,7 @@ const HotelRegistration = () => {
             toast.error(error.message);
         }
     };
+
 
     return (
         <div

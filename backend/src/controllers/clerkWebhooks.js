@@ -22,7 +22,7 @@ export const clerkWebhooks = async (req, res) => {
         console.log('🔍 Headers received:', Object.keys(headers));
 
         // Verify webhook and get verified event data
-        const evt = wbHook.verify(JSON.stringify(req.body), headers);
+        const evt = wbHook.verify(req.body, headers);
         const { data, type } = evt;
 
         console.log('✅ Webhook verified. Type:', type, 'User ID:', data.id);

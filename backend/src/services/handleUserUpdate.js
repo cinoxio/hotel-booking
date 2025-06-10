@@ -1,38 +1,43 @@
+import User from '../models/User.js';
 
-export const handleUserUpdated=async(data)=> {
-  try {
-    const {
-      id,
-      email_addresses,
-      username,
-      image_url
-    } = data;
+export const handleUserUpdated = async (data) => {
+    try {
+        const {
+            id,
+            email_addresses,
+            username,
+            image_url,
+            first_name,
+            last_name,
+        } = data;
 
-    // Get primary email
-    const primaryEmail = email_addresses.find(email => email.id === data.primary_email_address_id);
+        const primaryEmailObj =
+            email_addresses.find(
+                (email) => email.id === data.primary_email_address_id
+            ) || email_addresses[0];
+        const email = primaryEmailObj?.email_address || '';
 
-    const updateData = {
-      email: primaryEmail?.email_address || '',
-      username: `${first_name || ''} ${last_name || ''}`.trim() || username,
-      image: image_url || null,
-      updatedAt: new Date()
-    };
+        const updateData = {
+            email,
+            username:
+                `${first_name || ''} ${last_name || ''}`.trim() || username,
+            image: image_url || null,
+            updatedAt: new Date(),
+        };
 
-    const updatedUser = await User.findByIdAndUpdate(
-      id, // Direct _id lookup since we use Clerk ID as _id
-      updateData,
-      { new: true, runValidators: true }
-    );
+        const updatedUser = await User.findByIdAndUpdate(id, updateData, {
+            new: true,
+            runValidators: true,
+        });
 
-    if (!updatedUser) {
-      console.warn(`User not found for update: ${id}`);
-      return;
+        if (!updatedUser) {
+            console.warn(`User not found: ${id}`);
+            return;
+        }
+
+        console.log(`User updated: ${updatedUser.email}`);
+    } catch (error) {
+        console.error('Error updating user:', error);
+        throw error;
     }
-
-    console.log(`User updated in database: ${updatedUser.email}`);
-
-  } catch (error) {
-    console.error('Error updating user:', error);
-    throw error;
-  }
-}
+};
